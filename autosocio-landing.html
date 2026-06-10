@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoSocio — Tu mecánico de confianza, siempre disponible</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root { --cyan: #06b6d4; --bg: #020617; }
+    body { background: var(--bg); font-family: system-ui, -apple-system, sans-serif; }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #06b6d4, #7c3aed);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .glass {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+    .glow-card {
+      box-shadow: 0 0 40px rgba(6,182,212,0.08);
+      transition: box-shadow 0.3s, transform 0.3s;
+    }
+    .glow-card:hover {
+      box-shadow: 0 0 60px rgba(6,182,212,0.18);
+      transform: translateY(-3px);
+    }
+
+    @keyframes float {
+      0%,100%{ transform: translateY(0); }
+      50%{ transform: translateY(-8px); }
+    }
+    .float { animation: float 4s ease-in-out infinite; }
+    .float-delay { animation: float 4s ease-in-out infinite; animation-delay: 1.5s; }
+
+    @keyframes pulse-dot {
+      0%,100%{ opacity:1; transform: scale(1); }
+      50%{ opacity:.5; transform: scale(1.5); }
+    }
+    .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+    @keyframes slide-up {
+      from { opacity:0; transform:translateY(20px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .slide-up { animation: slide-up 0.6s ease-out both; }
+    .delay-1  { animation-delay: 0.1s; }
+    .delay-2  { animation-delay: 0.25s; }
+    .delay-3  { animation-delay: 0.4s; }
+    .delay-4  { animation-delay: 0.55s; }
+
+    .step-line {
+      width: 2px;
+      background: linear-gradient(to bottom, #06b6d4, #7c3aed);
+      flex-shrink: 0;
+    }
+
+    .problem-card:hover .problem-icon { transform: scale(1.1); }
+    .problem-icon { transition: transform 0.2s; }
+
+    /* Chat bubble */
+    .bubble-user {
+      background: rgba(6,182,212,0.1);
+      border: 1px solid rgba(6,182,212,0.2);
+      border-radius: 20px 20px 4px 20px;
+    }
+    .bubble-ai {
+      background: rgba(124,58,237,0.1);
+      border: 1px solid rgba(124,58,237,0.2);
+      border-radius: 20px 20px 20px 4px;
+    }
+
+    @keyframes typing {
+      0%,60%{ opacity:1 } 30%{ opacity:0 }
+    }
+    .dot1{ animation: typing 1.4s infinite 0s; }
+    .dot2{ animation: typing 1.4s infinite 0.2s; }
+    .dot3{ animation: typing 1.4s infinite 0.4s; }
+
+    .cta-btn {
+      background: linear-gradient(135deg, #06b6d4, #7c3aed);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .cta-btn:hover { opacity: 0.9; transform: scale(1.02); }
+    .cta-btn:active { transform: scale(0.98); }
+
+    .badge {
+      font-size: 9px; font-weight: 900; letter-spacing: 0.15em;
+      padding: 3px 12px; border-radius: 9999px; text-transform: uppercase;
+    }
+
+    /* Noise texture overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0;
+    }
+  </style>
+</head>
+<body class="min-h-screen text-white relative">
+
+  <!-- ── NAV ──────────────────────────────────────────────────────── -->
+  <nav class="relative z-10 px-6 md:px-12 py-5 flex items-center justify-between glass border-b border-white/5">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center font-black text-sm text-white shadow-lg">AS</div>
+      <span class="font-black text-white text-lg tracking-tight">AutoSocio</span>
+    </div>
+    <div class="hidden md:flex items-center gap-8 text-sm text-gray-400">
+      <a href="#como-funciona" class="hover:text-white transition-colors">Cómo funciona</a>
+      <a href="#para-quien" class="hover:text-white transition-colors">¿Para quién?</a>
+      <a href="#expertos" class="hover:text-white transition-colors">Expertos</a>
+    </div>
+    <button class="cta-btn text-white font-black text-xs px-5 py-2.5 rounded-xl tracking-wide uppercase">
+      Probar gratis
+    </button>
+  </nav>
+
+  <!-- ── HERO ─────────────────────────────────────────────────────── -->
+  <section class="relative z-10 px-6 md:px-12 pt-20 pb-24 max-w-6xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+      <!-- Left: Copy -->
+      <div class="space-y-8">
+        <div class="slide-up">
+          <span class="badge bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+            <span class="pulse-dot inline-block w-1.5 h-1.5 bg-cyan-400 rounded-full mr-2"></span>
+            IA automotriz · disponible 24/7
+          </span>
+        </div>
+
+        <h1 class="slide-up delay-1 text-5xl md:text-6xl font-black leading-[1.05] tracking-tight">
+          Tu carro falló.<br/>
+          <span class="gradient-text">Nosotros te decimos</span><br/>
+          qué tiene.
+        </h1>
+
+        <p class="slide-up delay-2 text-gray-400 text-lg leading-relaxed max-w-lg">
+          Describe el problema en tus palabras. AutoSocio lo diagnostica con inteligencia artificial, encuentra la pieza correcta y — si lo necesitas — te conecta con un mecánico experto en segundos.
+        </p>
+
+        <div class="slide-up delay-3 flex flex-col sm:flex-row gap-4">
+          <button class="cta-btn text-white font-black text-sm px-8 py-4 rounded-2xl tracking-wide uppercase shadow-xl shadow-cyan-500/20">
+            Diagnosticar mi auto ahora
+          </button>
+          <button class="glass text-white font-bold text-sm px-8 py-4 rounded-2xl border-white/10 hover:border-white/20 transition-all">
+            Ver cómo funciona →
+          </button>
+        </div>
+
+        <!-- Social proof -->
+        <div class="slide-up delay-4 flex items-center gap-6 pt-2">
+          <div class="flex -space-x-2">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 border-2 border-gray-950 flex items-center justify-center text-[9px] font-black">M</div>
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 border-2 border-gray-950 flex items-center justify-center text-[9px] font-black">A</div>
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 border-2 border-gray-950 flex items-center justify-center text-[9px] font-black">R</div>
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-gray-950 flex items-center justify-center text-[9px] font-black">J</div>
+          </div>
+          <div>
+            <div class="flex gap-0.5 text-amber-400 text-xs">★★★★★</div>
+            <div class="text-gray-500 text-xs mt-0.5">Usado por mecánicos y conductores en LATAM</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Chat simulation -->
+      <div class="float relative">
+        <div class="glass rounded-3xl p-6 space-y-4 shadow-2xl shadow-cyan-500/10 max-w-sm mx-auto">
+          <!-- Header chat -->
+          <div class="flex items-center gap-3 pb-4 border-b border-white/5">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center font-black text-sm">AS</div>
+            <div>
+              <div class="font-black text-sm">AutoSocio IA</div>
+              <div class="flex items-center gap-1.5">
+                <div class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></div>
+                <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">En línea ahora</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Messages -->
+          <div class="space-y-3">
+            <div class="bubble-user p-3 max-w-[85%] ml-auto">
+              <p class="text-sm text-white leading-relaxed">"Mi Nissan Versa 2018 vibra mucho al frenar y escucho un chirrido"</p>
+            </div>
+
+            <div class="bubble-ai p-3 max-w-[90%]">
+              <p class="text-[10px] text-purple-400 font-black uppercase tracking-wider mb-1">AutoSocio detecta →</p>
+              <p class="text-sm text-white leading-relaxed">Probable desgaste en <strong>pastillas de freno</strong> y posible daño en <strong>discos</strong>. Nivel de urgencia: <span class="text-amber-400 font-bold">MEDIO-ALTO</span></p>
+            </div>
+
+            <div class="bubble-ai p-3 max-w-[90%]">
+              <p class="text-sm text-gray-300 leading-relaxed">Encontré <strong class="text-cyan-400">8 opciones de pastillas</strong> compatibles con tu Versa desde <strong class="text-white">$380 MXN</strong>. ¿Quieres verlas o prefieres hablar con un mecánico?</p>
+            </div>
+
+            <!-- Typing indicator -->
+            <div class="flex items-center gap-2 pl-1">
+              <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500/20 to-purple-600/20 border border-white/10 flex items-center justify-center text-[8px] font-black">AS</div>
+              <div class="bubble-ai px-4 py-2 inline-flex gap-1 items-center">
+                <span class="dot1 w-1.5 h-1.5 bg-purple-400 rounded-full inline-block"></span>
+                <span class="dot2 w-1.5 h-1.5 bg-purple-400 rounded-full inline-block"></span>
+                <span class="dot3 w-1.5 h-1.5 bg-purple-400 rounded-full inline-block"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Input bar -->
+          <div class="flex gap-2 pt-2">
+            <div class="flex-1 bg-white/5 rounded-xl px-4 py-3 text-gray-600 text-sm border border-white/5">
+              Escribe tu problema...
+            </div>
+            <button class="w-10 h-10 cta-btn rounded-xl flex items-center justify-center flex-shrink-0">
+              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Floating badges -->
+        <div class="float-delay absolute -top-4 -right-4 glass rounded-2xl px-4 py-2 text-[10px] font-black uppercase tracking-wider text-emerald-400 border border-emerald-500/20 shadow-lg">
+          ✓ Diagnóstico en &lt;10 seg
+        </div>
+        <div class="float absolute -bottom-4 -left-4 glass rounded-2xl px-4 py-2 text-[10px] font-black uppercase tracking-wider text-cyan-400 border border-cyan-500/20 shadow-lg">
+          🔧 +200 expertos disponibles
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── EL PROBLEMA ──────────────────────────────────────────────── -->
+  <section id="para-quien" class="relative z-10 px-6 md:px-12 py-24 max-w-6xl mx-auto">
+    <div class="text-center mb-16 space-y-4">
+      <span class="badge bg-white/5 text-gray-400 border border-white/10">El problema real</span>
+      <h2 class="text-4xl md:text-5xl font-black tracking-tight leading-tight">
+        ¿Te ha pasado alguna de estas?
+      </h2>
+      <p class="text-gray-500 max-w-xl mx-auto">Millones de conductores en LATAM enfrentan esto cada semana.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="problem-card glass rounded-3xl p-8 glow-card space-y-4">
+        <div class="problem-icon text-5xl">😰</div>
+        <h3 class="font-black text-lg leading-tight">El mecánico me cobra pero no sé si me está estafando</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">Sin conocimiento técnico, es imposible saber si el diagnóstico es correcto o si la reparación es necesaria.</p>
+        <div class="pt-2 border-t border-white/5 text-[10px] text-cyan-400 font-black uppercase tracking-widest">AutoSocio lo resuelve →</div>
+      </div>
+
+      <div class="problem-card glass rounded-3xl p-8 glow-card space-y-4" style="border-color:rgba(124,58,237,0.15)">
+        <div class="problem-icon text-5xl">🔍</div>
+        <h3 class="font-black text-lg leading-tight">Busco la pieza en internet y encuentro 20 opciones diferentes</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">¿OEM? ¿Genérica? ¿Compatible con mi motor? Comprar la pieza equivocada cuesta el doble.</p>
+        <div class="pt-2 border-t border-white/5 text-[10px] text-purple-400 font-black uppercase tracking-widest">AutoSocio lo resuelve →</div>
+      </div>
+
+      <div class="problem-card glass rounded-3xl p-8 glow-card space-y-4" style="border-color:rgba(245,158,11,0.15)">
+        <div class="problem-icon text-5xl">🕐</div>
+        <h3 class="font-black text-lg leading-tight">Mi carro falló un domingo a las 11 pm y no tengo a quién llamar</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">Los talleres cierran. Los mecánicos de confianza no contestan. Quedas varado sin información.</p>
+        <div class="pt-2 border-t border-white/5 text-[10px] text-amber-400 font-black uppercase tracking-widest">AutoSocio lo resuelve →</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CÓMO FUNCIONA ─────────────────────────────────────────────── -->
+  <section id="como-funciona" class="relative z-10 px-6 md:px-12 py-24" style="background: linear-gradient(180deg, transparent, rgba(6,182,212,0.02), transparent)">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-16 space-y-4">
+        <span class="badge bg-white/5 text-gray-400 border border-white/10">Simple y rápido</span>
+        <h2 class="text-4xl md:text-5xl font-black tracking-tight">
+          3 pasos para resolver<br/>
+          <span class="gradient-text">cualquier problema de tu auto</span>
+        </h2>
+      </div>
+
+      <div class="space-y-0">
+
+        <!-- Step 1 -->
+        <div class="flex gap-8 items-start">
+          <div class="flex flex-col items-center gap-0 flex-shrink-0">
+            <div class="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
+              <span class="text-2xl">🗣️</span>
+            </div>
+            <div class="step-line h-24 mt-2 opacity-30"></div>
+          </div>
+          <div class="pb-12 space-y-3 pt-3">
+            <div class="badge bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Paso 1</div>
+            <h3 class="font-black text-2xl">Describe el problema como lo harías con un amigo</h3>
+            <p class="text-gray-400 leading-relaxed max-w-xl">No necesitas saber términos técnicos. Di: <em class="text-white">"hace un ruido raro al doblar"</em>, <em class="text-white">"huele a quemado cuando acelero"</em>, <em class="text-white">"la luz del motor está prendida"</em>. Por voz o texto.</p>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="flex gap-8 items-start">
+          <div class="flex flex-col items-center gap-0 flex-shrink-0">
+            <div class="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center">
+              <span class="text-2xl">🤖</span>
+            </div>
+            <div class="step-line h-24 mt-2 opacity-30" style="background: linear-gradient(to bottom, #7c3aed, #10b981)"></div>
+          </div>
+          <div class="pb-12 space-y-3 pt-3">
+            <div class="badge bg-purple-500/10 text-purple-400 border border-purple-500/20">Paso 2</div>
+            <h3 class="font-black text-2xl">La IA diagnostica y encuentra la pieza exacta</h3>
+            <p class="text-gray-400 leading-relaxed max-w-xl">AutoSocio analiza los síntomas, identifica las causas probables y busca la pieza correcta para tu marca, modelo y año — con precio real y dónde comprarla.</p>
+            <div class="flex flex-wrap gap-2 pt-2">
+              <span class="glass text-xs text-gray-400 px-3 py-1 rounded-full border border-white/5">✓ Diagnóstico guiado</span>
+              <span class="glass text-xs text-gray-400 px-3 py-1 rounded-full border border-white/5">✓ Pieza compatible garantizada</span>
+              <span class="glass text-xs text-gray-400 px-3 py-1 rounded-full border border-white/5">✓ Comparativa de precios</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="flex gap-8 items-start">
+          <div class="flex flex-col items-center gap-0 flex-shrink-0">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+              <span class="text-2xl">👨‍🔧</span>
+            </div>
+          </div>
+          <div class="pb-4 space-y-3 pt-3">
+            <div class="badge bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Paso 3 · Si lo necesitas</div>
+            <h3 class="font-black text-2xl">Habla con un experto real en segundos</h3>
+            <p class="text-gray-400 leading-relaxed max-w-xl">Si el problema es complejo o quieres confirmación de un humano, te conectamos con un mecánico especialista. Ya tiene todo el contexto de tu caso — no tienes que explicar nada de nuevo.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PARA QUIÉN ────────────────────────────────────────────────── -->
+  <section id="expertos" class="relative z-10 px-6 md:px-12 py-24 max-w-6xl mx-auto">
+    <div class="text-center mb-16 space-y-4">
+      <span class="badge bg-white/5 text-gray-400 border border-white/10">¿Quién usa AutoSocio?</span>
+      <h2 class="text-4xl md:text-5xl font-black tracking-tight">
+        Para ti, sin importar<br/>cuánto sabes de carros
+      </h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <!-- Conductor -->
+      <div class="glass rounded-3xl p-8 glow-card space-y-5 border-cyan-500/10">
+        <div class="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-3xl">🚗</div>
+        <div>
+          <div class="badge bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 mb-3">Conductor</div>
+          <h3 class="font-black text-xl mb-2">No sabes nada de mecánica</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">AutoSocio habla en tu idioma. Sin tecnicismos. Te dice qué tiene tu carro, qué tan urgente es, y cuánto deberías pagar — para que nunca te vuelvan a cobrar de más.</p>
+        </div>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2 text-xs text-gray-400">
+            <div class="w-4 h-4 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0">✓</div>
+            Diagnóstico en lenguaje simple
+          </div>
+          <div class="flex items-center gap-2 text-xs text-gray-400">
+            <div class="w-4 h-4 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0">✓</div>
+            Precio justo de referencia
+          </div>
+          <div class="flex items-center gap-2 text-xs text-gray-400">
+            <div class="w-4 h-4 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0">✓</div>
+            Experto a un clic si dudas
+          </div>
+        </div>
+      </div>
+
+      <!-- Mecánico -->
+      <div class="glass rounded-3xl p-8 glow-card space-y-5 border-purple-500/10" style="background: rgba(124,58,237,0.03)">
+        <div class="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-3xl">🔧</div>
+        <div>
+          <div class="badge bg-purple-500/10 text-purple-400 border border-purple-500/20 mb-3">Mecánico / Taller</div>
+          <h3 class="font-black text-xl mb-2">Eres el experto</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">Ofrece consultas por video, construye tu reputación, accede a clientes que ya saben qué tienen. AutoSocio te trae el caso pre-diagnosticado — tú solo confirmas y cierras.</p>
+        </div>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2 text-xs text-gray-400">
+            <div class="w-4 h-4 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 flex-shrink-0">✓</div>
+            Clientes calificados y listos
+          </div>
+          <div class="flex items-center gap-2 text-xs text-gray-400">
+            <div class="w-4 h-4 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 flex-shrink-0">✓</div>
+            Sistema de reputación y rating
+          </div>
+          <div class="flex items-center gap-2 text-xs text-gray-400">
+            <div class="w-4 h-4 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 flex-shrink-0">✓</div>
+            Ingresos adicionales online
+          </div>
+        </div>
+      </div>
+
+      <!-- Flotilla -->
+      <div class="glass rounded-3xl p-8 glow-card space-y-5 border-amber-500/10">
+        <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-3xl">🚛</div>
+        <div>
+          <div class="badge bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-3">Empresa / Flotilla</div>
+          <h3 class="font-black text-xl mb-2">Tienes varios vehículos</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">Controla el estado de toda tu flotilla desde un lugar. Anticipa fallas antes de que paren tus operaciones. Reduce costos de mantenimiento con diagnóstico preventivo.</p>
+        </div>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2 text-xs text-gray-400">
+            <div class="w-4 h-4 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 flex-shrink-0">✓</div>
+            Panel de control de flotilla
+          </div>
+          <div class="flex items-center gap-2 text-xs text-gray-400">
+            <div class="w-4 h-4 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 flex-shrink-0">✓</div>
+            Alertas de mantenimiento preventivo
+          </div>
+          <div class="flex items-center gap-2 text-xs text-gray-400">
+            <div class="w-4 h-4 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 flex-shrink-0">✓</div>
+            Historial por vehículo
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── DIFERENCIADORES ───────────────────────────────────────────── -->
+  <section class="relative z-10 px-6 md:px-12 py-24" style="background: linear-gradient(180deg, transparent, rgba(124,58,237,0.03), transparent)">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-16 space-y-4">
+        <span class="badge bg-white/5 text-gray-400 border border-white/10">Por qué AutoSocio</span>
+        <h2 class="text-4xl md:text-5xl font-black tracking-tight">
+          No es un buscador.<br/>
+          <span class="gradient-text">Es tu mecánico de cabecera.</span>
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="glass rounded-3xl p-8 space-y-3 glow-card">
+          <div class="text-3xl">🎯</div>
+          <h3 class="font-black text-lg">Pieza correcta, no la más cara</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">La IA busca compatibilidad real con tu vehículo específico — marca, modelo, año, motor. Nunca una sugerencia genérica que podría no funcionar.</p>
+        </div>
+        <div class="glass rounded-3xl p-8 space-y-3 glow-card">
+          <div class="text-3xl">🛡️</div>
+          <h3 class="font-black text-lg">Sin alucinaciones. Datos reales.</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">Si AutoSocio no está seguro, te lo dice. Y te conecta con un experto humano. No te deja con información incorrecta que podría dañar tu motor.</p>
+        </div>
+        <div class="glass rounded-3xl p-8 space-y-3 glow-card">
+          <div class="text-3xl">⚡</div>
+          <h3 class="font-black text-lg">Diagnóstico en segundos, no en horas</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">Sin citas, sin esperar, sin explicar el problema tres veces. Describes los síntomas, obtienes la respuesta de inmediato — a las 3am si lo necesitas.</p>
+        </div>
+        <div class="glass rounded-3xl p-8 space-y-3 glow-card">
+          <div class="text-3xl">🤝</div>
+          <h3 class="font-black text-lg">El experto ya sabe todo cuando hablas con él</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">Cuando escalas al mecánico humano, recibe todo el contexto: vehículo, síntomas, diagnóstico IA. La consulta dura minutos, no una hora de preguntas básicas.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA FINAL ─────────────────────────────────────────────────── -->
+  <section class="relative z-10 px-6 md:px-12 py-24">
+    <div class="max-w-3xl mx-auto">
+      <div class="glass rounded-[2.5rem] p-12 text-center space-y-8" style="box-shadow: 0 0 80px rgba(6,182,212,0.1); border-color: rgba(6,182,212,0.15)">
+        <div class="space-y-4">
+          <span class="badge bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Gratis para empezar</span>
+          <h2 class="text-4xl md:text-5xl font-black tracking-tight leading-tight">
+            ¿Tu auto tiene algo?<br/>
+            <span class="gradient-text">Descúbrelo ahora.</span>
+          </h2>
+          <p class="text-gray-400 text-lg max-w-md mx-auto leading-relaxed">
+            Miles de conductores y mecánicos en LATAM ya usan AutoSocio. Sin registro, sin tarjeta. Solo describe el problema.
+          </p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <button class="cta-btn text-white font-black text-base px-10 py-5 rounded-2xl tracking-wide uppercase shadow-2xl shadow-cyan-500/25">
+            Diagnosticar mi auto →
+          </button>
+        </div>
+        <div class="flex items-center justify-center gap-8 text-sm text-gray-600 pt-2">
+          <span>✓ Sin registro</span>
+          <span>✓ Respuesta en segundos</span>
+          <span>✓ 24/7 disponible</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ────────────────────────────────────────────────────── -->
+  <footer class="relative z-10 px-6 md:px-12 py-12 border-t border-white/5">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center font-black text-xs text-white">AS</div>
+        <span class="font-black text-gray-400 text-sm">AutoSocio</span>
+        <span class="text-gray-700 text-xs">Tu mecánico de confianza, siempre disponible</span>
+      </div>
+      <div class="text-[10px] text-gray-700 uppercase tracking-widest">México · Colombia · Argentina · Chile · Brasil · Perú</div>
+    </div>
+  </footer>
+
+</body>
+</html>
