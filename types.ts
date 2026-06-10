@@ -157,3 +157,24 @@ export interface EnrichedPartRecommendation {
   isMostRecommended: boolean;
   partId?: string;
 }
+
+export interface DecodedVehicle {
+  vin: string;
+  make: string;
+  model: string;
+  year: string;
+  engine: string;
+  fuelType: string;
+  transmission: string;
+  driveType: string;
+  bodyClass: string;
+  trim: string;
+}
+
+export interface AdvisorMessage {
+  id: string;
+  role: 'user' | 'advisor';
+  content: string;
+  sources?: { title: string; url: string }[];
+  timestamp: Date;
+}

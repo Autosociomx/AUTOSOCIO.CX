@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type, Chat } from "@google/genai";
-import type { Agent, Part, Language, DiagnosticGuide, AuditScenario, CIAModuleOutput } from '../types';
+import type { Agent, Part, Language, DiagnosticGuide, AuditScenario, CIAModuleOutput, DecodedVehicle } from '../types';
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
@@ -177,4 +177,109 @@ export async function getEnhancedPartRecommendations(
         },
     });
     return JSON.parse(response.text || '[]');
+}
+
+// ── VIN Expert Advisor ─────────────────────────────────────────────────────
+
+export async function extractVINFromImage(
+  image: { data: string; mimeType: string }
+): Promise<string | null> {
+  const response = await ai.models.generateContent({
+    model: 'gemini-3-flash-preview',
+    contents: {
+      parts: [
+        { inlineData: { data: image.data, mimeType: image.mimeType } },
+        { text: 'Extract the VIN (Vehicle Identification Number) from this image. Return ONLY the 17-character alphanumeric VIN, nothing else. If no VIN is visible, respond with: null' }
+      ]
+    }
+  });
+  const text = response.text?.trim() || '';
+  const match = text.match(/[A-HJ-NPR-Z0-9]{17}/i);
+  return match ? match[0].toUpperCase() : null;
+}
+
+export function createVehicleExpertSession(vehicle: DecodedVehicle | null, lang: Language = 'es'): Chat {
+  const vehicleDesc = vehicle
+    ? `${vehicle.year} ${vehicle.make} ${vehicle.model} ${vehicle.engine} (VIN: ${vehicle.vin})`
+    : 'vehículo no identificado aún';
+
+  const systemInstruction = lang === 'es' ? `
+Eres AutoSocio Elite — el asesor técnico automotriz más completo de Latinoamérica.
+${vehicle ? `Estás especializado en el ${vehicleDesc}.` : 'El usuario aún no ha identificado su vehículo. Tu primer mensaje debe preguntar marca, modelo y año.'}
+
+PERSONALIDAD:
+- Eres como el amigo mecánico de confianza que todos quisieran tener
+- Directo, honesto, sin rodeos — si el mecánico tiene razón lo dices, si está cobrando de más también
+- Técnico pero accesible: explicas sin jerga innecesaria
+- Empático: entiendes que esto es estresante y costoso para el usuario
+
+TU ROL:
+- Dar una segunda opinión honesta sobre cualquier diagnóstico mecánico
+- Identificar si una reparación es realmente necesaria o es exageración
+- Explicar qué pasa realmente con el vehículo en términos simples
+- Recomendar la pieza correcta cuando aplique
+- Señalar cuándo sí necesita un mecánico y cuándo puede esperarse
+
+CAPACIDADES:
+- Conoces las fallas comunes, TSBs y recalls de todos los modelos en LATAM
+- Puedes buscar información técnica real en internet cuando la necesitas
+- Sabes los precios de mercado reales de piezas en México, Colombia, Argentina, etc.
+- Conoces la diferencia entre piezas OEM, genéricas y cuándo importa
+
+REGLAS DE ORO:
+1. NUNCA inventes datos técnicos. Si buscas en internet, dilo.
+2. Siempre termina con una recomendación de acción concreta y clara
+3. Si el problema es grave o de seguridad, adviértelo primero
+4. Si necesitas más información para dar un diagnóstico preciso, pregunta
+5. Máximo 3-4 párrafos por respuesta. Directo al punto.
+
+FORMATO DE RESPUESTA:
+- Diagnóstico: qué está pasando realmente
+- Veredicto: ¿el mecánico tiene razón? ¿está cobrando justo?
+- Acción: qué hacer ahora mismo
+` : `
+You are AutoSocio Elite — the most complete automotive technical advisor in Latin America.
+${vehicle ? `You specialize in the ${vehicleDesc}.` : 'The user has not yet identified their vehicle. Ask for make, model, and year.'}
+Be direct, honest, technical but accessible. Give second opinions on mechanic diagnoses.
+Never invent data. Always end with a concrete action recommendation.
+`;
+
+  return ai.chats.create({
+    model: 'gemini-3-pro-preview',
+    config: {
+      systemInstruction,
+      temperature: 0.6,
+      tools: [{ googleSearch: {} }],
+    },
+  });
+}
+
+export async function sendMessageToExpert(
+  chat: Chat,
+  message: string,
+  image?: { data: string; mimeType: string }
+): Promise<{ text: string; sources: { title: string; url: string }[] }> {
+  let response;
+
+  if (image) {
+    response = await (chat as any).sendMessage({
+      message: {
+        parts: [
+          { inlineData: { data: image.data, mimeType: image.mimeType } },
+          { text: message || 'Analiza esta imagen.' }
+        ]
+      }
+    });
+  } else {
+    response = await chat.sendMessage({ message });
+  }
+
+  const text = response.text || 'Sin respuesta. Intenta de nuevo.';
+
+  const chunks: any[] = response.candidates?.[0]?.groundingMetadata?.groundingChunks ?? [];
+  const sources = chunks
+    .map((c: any) => ({ title: c.web?.title || '', url: c.web?.uri || '' }))
+    .filter(s => s.url);
+
+  return { text, sources };
 }

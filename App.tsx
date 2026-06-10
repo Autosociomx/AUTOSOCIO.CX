@@ -7,15 +7,16 @@ import AgentDetailModal from './components/AgentDetailModal';
 import AffiliateMarketplace from './components/AffiliateMarketplace';
 import AcademyPortal from './components/AcademyPortal';
 import ProfileDrawer from './components/ProfileDrawer';
+import VINAdvisor from './components/VINAdvisor';
 import AcademicIcon from './components/icons/AcademicIcon';
 import SearchIcon from './components/icons/SearchIcon';
 import UserGroupIcon from './components/icons/UserGroupIcon';
 
-type View = 'marketplace' | 'consulting' | 'academy';
+type View = 'advisor' | 'marketplace' | 'consulting' | 'academy';
 
 const App: React.FC = () => {
   const [isSystemInitializing, setIsSystemInitializing] = useState(true);
-  const [activeView, setActiveView] = useState<View>('marketplace'); // Enfoque: ADN (Marketplace)
+  const [activeView, setActiveView] = useState<View>('advisor');
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [showLangMenu, setShowLangMenu] = useState(false);
   
@@ -62,6 +63,7 @@ const App: React.FC = () => {
   const labels = useMemo(() => getLabels(user.language), [user.language]);
 
   const menuItems = useMemo(() => [
+    { id: 'advisor', label: 'Asesor', icon: <span className="text-base">🤖</span> },
     { id: 'marketplace', label: labels.nav.marketplace, icon: <SearchIcon /> },
     { id: 'consulting', label: labels.nav.experts, icon: <UserGroupIcon /> },
     { id: 'academy', label: labels.nav.courses, icon: <AcademicIcon /> },
@@ -182,6 +184,19 @@ const App: React.FC = () => {
 
       <main className="pt-32 px-6 max-w-7xl mx-auto relative z-10">
         
+        {/* VISTA 0: ASESOR VIN (Principal) */}
+        {activeView === 'advisor' && (
+          <VINAdvisor
+            userLanguage={user.language}
+            onSearchPart={(query) => {
+              handleViewChange('marketplace');
+            }}
+            onCallExpert={() => {
+              handleViewChange('consulting');
+            }}
+          />
+        )}
+
         {/* VISTA 1: MARKETPLACE (ADN) */}
         {activeView === 'marketplace' && (
              <AffiliateMarketplace userLanguage={user.language} />
