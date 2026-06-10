@@ -1,0 +1,8 @@
+{
+  "name": "Autosocio: Gestión Inteligente",
+  "description": "Plataforma de IA para gestión de flotas y asistencia técnica uno a uno en tiempo real con visión artificial.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera"
+  ]
+}
