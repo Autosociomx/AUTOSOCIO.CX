@@ -3,6 +3,12 @@ import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { PARTS_CATALOG, REGIONAL_PLATFORMS, getLabels } from '../constants';
 import type { EnrichedPartRecommendation, Language, DiagnosticGuide, AuditScenario, Part } from '../types';
 import { identifyPartKeywords, getEnhancedPartRecommendations, generateDiagnosticGuide, analyzeIntent } from '../services/geminiService';
+import {
+  captureSession,
+  capturePartSearch,
+  buildSessionFromDiagnostic,
+  buildPartSearchFromResults,
+} from '../services/dataIntelligenceService';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import MicrophoneIcon from './icons/MicrophoneIcon';
 import CameraIcon from './icons/CameraIcon';
@@ -41,6 +47,7 @@ const AffiliateMarketplace: React.FC<AffiliateMarketplaceProps> = ({ initialSear
   });
 
   const [activeField, setActiveField] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   
   const labels = useMemo(() => getLabels(userLanguage), [userLanguage]);
 
@@ -97,7 +104,21 @@ const AffiliateMarketplace: React.FC<AffiliateMarketplaceProps> = ({ initialSear
       ]);
 
       setDiagnosticGuide(guide);
-      
+
+      // ── Captura de datos para el dataset ──────────────────────────
+      const sessionData = buildSessionFromDiagnostic({
+        vehicleData,
+        rawQuery: fullADN,
+        intentScenario: scenario,
+        guide,
+        language: userLanguage as Language,
+        usedVoice: false,
+        usedImage: !!uploadedImage,
+      });
+      const capturedId = await captureSession(sessionData);
+      if (capturedId) setSessionId(capturedId);
+      // ─────────────────────────────────────────────────────────────
+
       if (scenario !== 'EDUCATION') {
         const platforms = REGIONAL_PLATFORMS[userLanguage] || REGIONAL_PLATFORMS['es'];
         
@@ -142,6 +163,12 @@ const AffiliateMarketplace: React.FC<AffiliateMarketplaceProps> = ({ initialSear
         });
 
         setEnrichedResults(results);
+
+        // Captura búsqueda de piezas
+        if (capturedId && results.length > 0) {
+          const partSearch = buildPartSearchFromResults(capturedId, vehicleData.part, results);
+          await capturePartSearch(partSearch);
+        }
       } else {
         setEnrichedResults([]);
       }
